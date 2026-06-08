@@ -17,7 +17,7 @@ data:
       "panels": [
         {
           "id": 1,
-          "title": "Pod Status (Running / Not Running)",
+          "title": "Pod Status (Running)",
           "type": "stat",
           "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
           "targets": [
@@ -44,7 +44,7 @@ data:
           "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
           "targets": [
             {
-              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd\", phase!=\"Running\", phase!=\"Succeeded\"}) or vector(0)",
+              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd\", phase=~\"Pending|Failed|Unknown\"}) or vector(0)",
               "legendFormat": "Not Running"
             }
           ],
@@ -163,12 +163,12 @@ data:
         },
         {
           "id": 8,
-          "title": "OOMKilled 감지 (최근 1시간)",
+          "title": "OOMKilled 감지",
           "type": "stat",
           "gridPos": { "x": 0, "y": 20, "w": 8, "h": 4 },
           "targets": [
             {
-              "expr": "sum(kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\"}) or vector(0)",
+              "expr": "sum(kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\", namespace!~\"kube-system|monitoring|argocd\"}) or vector(0)",
               "legendFormat": "OOMKilled"
             }
           ],
