@@ -22,7 +22,7 @@ data:
           "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
           "targets": [
             {
-              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd\", phase=\"Running\"})",
+              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\", phase=\"Running\"})",
               "legendFormat": "Running"
             }
           ],
@@ -44,7 +44,7 @@ data:
           "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
           "targets": [
             {
-              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd\", phase=~\"Pending|Failed|Unknown\"}) or vector(0)",
+              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\", phase=~\"Pending|Failed|Unknown\"}) or vector(0)",
               "legendFormat": "Not Running"
             }
           ],
@@ -67,7 +67,7 @@ data:
           "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
           "targets": [
             {
-              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|monitoring|argocd\"}[5m]))",
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\"}[5m]))",
               "legendFormat": "Restarts"
             }
           ],
@@ -114,7 +114,7 @@ data:
           "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
           "targets": [
             {
-              "expr": "increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|monitoring|argocd\"}[5m])",
+              "expr": "increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\"}[5m])",
               "legendFormat": "{{namespace}}/{{pod}}/{{container}}"
             }
           ],
@@ -132,7 +132,7 @@ data:
           "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace!~\"kube-system|monitoring|argocd\", container!=\"\"}[5m])) by (pod, namespace)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\", container!=\"\"}[5m])) by (pod, namespace)",
               "legendFormat": "{{namespace}}/{{pod}}"
             }
           ],
@@ -150,7 +150,7 @@ data:
           "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace!~\"kube-system|monitoring|argocd\", container!=\"\"}) by (pod, namespace)",
+              "expr": "sum(container_memory_working_set_bytes{namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\", container!=\"\"}) by (pod, namespace)",
               "legendFormat": "{{namespace}}/{{pod}}"
             }
           ],
@@ -168,7 +168,7 @@ data:
           "gridPos": { "x": 0, "y": 20, "w": 8, "h": 4 },
           "targets": [
             {
-              "expr": "sum(kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\", namespace!~\"kube-system|monitoring|argocd\"}) or vector(0)",
+              "expr": "sum(kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\", namespace!~\"kube-system|monitoring|argocd|metallb-system|safespot-cache|safespot-db|ingress-nginx\"}) or vector(0)",
               "legendFormat": "OOMKilled"
             }
           ],
