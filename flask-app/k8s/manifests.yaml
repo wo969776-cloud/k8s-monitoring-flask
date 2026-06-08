@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: wo9697/flask-observability:latest
+          image: wo9697/flask-observability:5326bff2a67c678acee4dd1515ac87064132dda0
           ports:
             - containerPort: 5000
           resources:
