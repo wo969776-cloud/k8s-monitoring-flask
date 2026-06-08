@@ -19,7 +19,7 @@ data:
           {
             "name": "node",
             "type": "query",
-            "query": "label_values(kube_node_info, node)",
+            "query": "label_values(node_cpu_seconds_total, instance)",
             "label": "Node",
             "multi": true,
             "includeAll": true,
@@ -131,7 +131,7 @@ data:
           "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "1 - rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$node.*\"}[5m])",
+              "expr": "1 - rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$node\"}[5m])",
               "legendFormat": "{{instance}}"
             }
           ],
@@ -150,7 +150,7 @@ data:
           "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "node_memory_MemTotal_bytes{instance=~\"$node.*\"} - node_memory_MemAvailable_bytes{instance=~\"$node.*\"}",
+              "expr": "node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"}",
               "legendFormat": "{{instance}}"
             }
           ],
@@ -169,11 +169,11 @@ data:
           "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|veth.*\", instance=~\"$node.*\"}[5m])) by (instance)",
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|veth.*\", instance=~\"$node\"}[5m])) by (instance)",
               "legendFormat": "RX - {{instance}}"
             },
             {
-              "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*\", instance=~\"$node.*\"}[5m])) by (instance)",
+              "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*\", instance=~\"$node\"}[5m])) by (instance)",
               "legendFormat": "TX - {{instance}}"
             }
           ],
@@ -192,11 +192,11 @@ data:
           "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "sum(rate(node_disk_read_bytes_total{instance=~\"$node.*\"}[5m])) by (instance)",
+              "expr": "sum(rate(node_disk_read_bytes_total{instance=~\"$node\"}[5m])) by (instance)",
               "legendFormat": "Read - {{instance}}"
             },
             {
-              "expr": "sum(rate(node_disk_written_bytes_total{instance=~\"$node.*\"}[5m])) by (instance)",
+              "expr": "sum(rate(node_disk_written_bytes_total{instance=~\"$node\"}[5m])) by (instance)",
               "legendFormat": "Write - {{instance}}"
             }
           ],
