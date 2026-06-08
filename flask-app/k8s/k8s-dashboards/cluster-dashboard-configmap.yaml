@@ -1,0 +1,212 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  cluster-dashboard.json: |
+    {
+      "title": "Cluster Dashboard",
+      "uid": "cluster-dashboard",
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "templating": {
+        "list": [
+          {
+            "name": "node",
+            "type": "query",
+            "query": "label_values(kube_node_info, node)",
+            "label": "Node",
+            "multi": true,
+            "includeAll": true,
+            "current": { "text": "All", "value": "$__all" }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "CPU 사용률 (전체 노드 평균)",
+          "type": "stat",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+              "legendFormat": "CPU Usage"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.7 },
+                  { "color": "red", "value": 0.85 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "Memory 사용률 (전체 노드 평균)",
+          "type": "stat",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "1 - avg(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+              "legendFormat": "Memory Usage"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.7 },
+                  { "color": "red", "value": 0.85 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3,
+          "title": "Disk 사용률 (루트 파티션)",
+          "type": "stat",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "1 - avg(node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})",
+              "legendFormat": "Disk Usage"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.7 },
+                  { "color": "red", "value": 0.85 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "Network 수신량 (전체)",
+          "type": "stat",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|veth.*\"}[5m]))",
+              "legendFormat": "RX"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [{ "color": "blue", "value": null }]
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "노드별 CPU 사용률",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "1 - rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$node.*\"}[5m])",
+              "legendFormat": "{{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        },
+        {
+          "id": 6,
+          "title": "노드별 Memory 사용량",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "node_memory_MemTotal_bytes{instance=~\"$node.*\"} - node_memory_MemAvailable_bytes{instance=~\"$node.*\"}",
+              "legendFormat": "{{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        },
+        {
+          "id": 7,
+          "title": "Network In/Out",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|veth.*\", instance=~\"$node.*\"}[5m])) by (instance)",
+              "legendFormat": "RX - {{instance}}"
+            },
+            {
+              "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*\", instance=~\"$node.*\"}[5m])) by (instance)",
+              "legendFormat": "TX - {{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        },
+        {
+          "id": 8,
+          "title": "Disk I/O",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum(rate(node_disk_read_bytes_total{instance=~\"$node.*\"}[5m])) by (instance)",
+              "legendFormat": "Read - {{instance}}"
+            },
+            {
+              "expr": "sum(rate(node_disk_written_bytes_total{instance=~\"$node.*\"}[5m])) by (instance)",
+              "legendFormat": "Write - {{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        }
+      ]
+    }

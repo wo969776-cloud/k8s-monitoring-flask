@@ -1,0 +1,201 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  kubernetes-dashboard.json: |
+    {
+      "title": "Kubernetes Dashboard",
+      "uid": "k8s-dashboard",
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Pod Status (Running / Not Running)",
+          "type": "stat",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd\", phase=\"Running\"})",
+              "legendFormat": "Running"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "Pod Not Running",
+          "type": "stat",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "count(kube_pod_status_phase{namespace!~\"kube-system|monitoring|argocd\", phase!=\"Running\", phase!=\"Succeeded\"}) or vector(0)",
+              "legendFormat": "Not Running"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3,
+          "title": "Pod Restart Count (5m)",
+          "type": "stat",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|monitoring|argocd\"}[5m]))",
+              "legendFormat": "Restarts"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "Node Count",
+          "type": "stat",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "count(kube_node_status_condition{condition=\"Ready\", status=\"true\"})",
+              "legendFormat": "Ready Nodes"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "Pod Restart Count 추이 (컨테이너별)",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+          "targets": [
+            {
+              "expr": "increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|monitoring|argocd\"}[5m])",
+              "legendFormat": "{{namespace}}/{{pod}}/{{container}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        },
+        {
+          "id": 6,
+          "title": "Pod CPU 사용률",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace!~\"kube-system|monitoring|argocd\", container!=\"\"}[5m])) by (pod, namespace)",
+              "legendFormat": "{{namespace}}/{{pod}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "color": { "mode": "palette-classic" }
+            }
+          }
+        },
+        {
+          "id": 7,
+          "title": "Pod Memory 사용량",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum(container_memory_working_set_bytes{namespace!~\"kube-system|monitoring|argocd\", container!=\"\"}) by (pod, namespace)",
+              "legendFormat": "{{namespace}}/{{pod}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "color": { "mode": "palette-classic" }
+            }
+          }
+        },
+        {
+          "id": 8,
+          "title": "OOMKilled 감지 (최근 1시간)",
+          "type": "stat",
+          "gridPos": { "x": 0, "y": 20, "w": 8, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\"}) or vector(0)",
+              "legendFormat": "OOMKilled"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 9,
+          "title": "Node Ready 상태",
+          "type": "table",
+          "gridPos": { "x": 8, "y": 20, "w": 16, "h": 4 },
+          "targets": [
+            {
+              "expr": "kube_node_status_condition{condition=\"Ready\"}",
+              "legendFormat": "{{node}}",
+              "instant": true
+            }
+          ]
+        }
+      ]
+    }

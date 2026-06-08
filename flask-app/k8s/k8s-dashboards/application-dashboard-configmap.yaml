@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  application-dashboard.json: |
+    {
+      "title": "Application Dashboard (Flask)",
+      "uid": "app-dashboard",
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Flask App UP/DOWN",
+          "type": "stat",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "up{job=\"flask-app\"}",
+              "legendFormat": "Status"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "Request Rate (req/s)",
+          "type": "stat",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(rate(flask_request_count_total[1m]))",
+              "legendFormat": "req/s"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3,
+          "title": "Error Rate (5xx)",
+          "type": "stat",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(rate(flask_request_count_total{status=~\"5..\"}[1m]))",
+              "legendFormat": "5xx/s"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.01 },
+                  { "color": "red", "value": 0.1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "P95 Response Time",
+          "type": "stat",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(flask_request_duration_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p95"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.5 },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "Request Rate 추이 (엔드포인트별)",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum(rate(flask_request_count_total[1m])) by (endpoint, status)",
+              "legendFormat": "{{endpoint}} [{{status}}]"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        },
+        {
+          "id": 6,
+          "title": "Response Time 분포 (P50 / P95 / P99)",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(flask_request_duration_seconds_bucket[5m])) by (le))",
+              "legendFormat": "P50"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(flask_request_duration_seconds_bucket[5m])) by (le))",
+              "legendFormat": "P95"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(flask_request_duration_seconds_bucket[5m])) by (le))",
+              "legendFormat": "P99"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        },
+        {
+          "id": 7,
+          "title": "Error Rate 추이",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum(rate(flask_request_count_total{status=~\"5..\"}[1m])) by (endpoint)",
+              "legendFormat": "5xx - {{endpoint}}"
+            },
+            {
+              "expr": "sum(rate(flask_request_count_total{status=~\"4..\"}[1m])) by (endpoint)",
+              "legendFormat": "4xx - {{endpoint}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" },
+              "custom": { "lineWidth": 2 }
+            }
+          }
+        }
+      ]
+    }
