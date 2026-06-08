@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: <YOUR_DOCKERHUB_ID>/flask-observability:latest  # 본인 이미지로 교체
+          image: wo9697/flask-observability:latest
           ports:
             - containerPort: 5000
           resources:
