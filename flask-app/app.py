@@ -92,16 +92,15 @@ def cpu_load():
 @app.route('/memory-leak')
 @track('/memory-leak')
 def memory_leak():
-    # 호출할 때마다 ~10MB씩 누수 — OOMKilled 재현용
-    chunk = ' ' * (10 * 1024 * 1024)
+    # 호출할 때마다 ~5MB씩 누수 — OOMKilled 재현용
+    chunk = ' ' * (5 * 1024 * 1024)
     _memory_leak_store.append(chunk)
-    used_mb = len(_memory_leak_store) * 10
+    used_mb = len(_memory_leak_store) * 5
     return jsonify({
         "status": "leaked",
         "total_leaked_mb": used_mb,
         "chunks": len(_memory_leak_store)
     }), 200
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
