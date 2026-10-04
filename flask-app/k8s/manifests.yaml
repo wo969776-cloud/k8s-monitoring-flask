@@ -55,7 +55,7 @@ metadata:
     app: flask-app
 spec:
   selector:
-    app: flask-app        # ← Ingress 502 시나리오: 여기를 일부러 틀리게 바꿔서 재현
+    app: flask-app
   ports:
     - name: http
       port: 80
