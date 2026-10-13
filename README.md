@@ -1,5 +1,7 @@
 # k8s-monitoring-flask
 
+> 전체 설명(아키텍처, 장애 사례, 한계와 다음 단계)은 [k8s-monitoring-infra README](https://github.com/wo969776-cloud/k8s-monitoring-infra#readme)를 참고하세요. 이 레포는 그중 앱과 CI/CD 부분입니다.
+
 장애 재현용 엔드포인트를 가진 Flask 앱과, 이를 GitOps로 배포하기 위한 Kubernetes manifest 저장소입니다.
 Prometheus 커스텀 메트릭(`flask_request_count`, `flask_request_duration_seconds`)을 `/metrics`로 노출합니다.
 
@@ -48,3 +50,7 @@ ArgoCD Application 정의는 이 레포에 포함되어 있지 않습니다.
 ## gunicorn 워커를 1개로 둔 이유
 
 `Dockerfile` 주석 기준: `/memory-leak` 재현 시 누수 데이터가 전역 리스트에 쌓이는데, 워커가 여러 개면 요청이 워커별로 나뉘어 전역 상태가 유지되지 않습니다. 그래서 `--workers 1`로 실행합니다.
+
+---
+
+상세 내용: [노션 포트폴리오](https://app.notion.com/p/3efe08b1109d8132a024da7bbdbd4d0f)
